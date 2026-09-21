@@ -1,4 +1,4 @@
-FROM node:24-slim
+FROM node:24-slim AS build
 
 WORKDIR /app
 
@@ -8,6 +8,15 @@ RUN npm ci
 COPY . .
 
 RUN npm run build
+
+FROM node:24-slim AS runtime
+
+WORKDIR /app
+
+COPY package.json package-lock.json ./
+RUN npm ci --omit=dev
+
+COPY --from=build /app/.output ./.output
 
 EXPOSE 3000
 
